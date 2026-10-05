@@ -1,0 +1,13 @@
+# --- Sanal Ortam ---
+.venv/
+
+# --- Python  Geçici Dosyaları ---
+__pycache__/
+*.pyc
+
+# --- Ses Kayıtları ve Çıktılar (kişisel veri, büyük dosyalar) ---
+data/
+outputs/
+
+# --- Editör Ayarları ---
+.vscode/
