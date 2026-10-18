@@ -95,7 +95,10 @@ class Segment:
     language: str     # "tr"
     speaker: str      # "ben" / "karsi_taraf" (ses kaynağına göre)
     is_final: bool    # False: geçici sonuç, değişebilir
+    source_id: int    # çeviri ve ses çıktısını kaynak parçaya bağlamak için
 ```
+
+Tüm hat için bkz. [architecture.md](architecture.md) ve [D-003](decisions.md).
 
 Çeviri yalnızca `is_final=True` parçaları işlerse çeviri tarafı kararsız metinle uğraşmaz.
 
