@@ -82,8 +82,21 @@ konuşanın sesiyle duyar. Ağır işin nerede yapılacağı henüz kararlaştı
 | Risk | Bir istemci çökerse sadece o etkilenir | Sunucu düşerse herkes etkilenir (demo riski) |
 | İş yükü | Basit | WebSocket, oda/oturum yönetimi, yeniden bağlanma |
 
-Sunucu için seçenekler: geliştirme bilgisayarı (RTX 3060 12 GB; 3-5 kullanıcı ve 2-3 dil için yeterli görünüyor),
-saatlik kiralık bulut GPU veya üniversite sunucusu. `Segment` arayüzü iki yapıda da aynı kalır; sadece kuyruk yerine WebSocket ile taşınır.
+`Segment` arayüzü iki yapıda da aynı kalır; sadece kuyruk yerine WebSocket ile taşınır.
+
+### Sunucuyu nerede çalıştırırız? (ücretsiz)
+
+Bu bir son kullanıcı ürünü değil, bitmiş bir fikir / demo. Sunucunun 7/24 açık olması gerekmez; sadece test oturumlarında
+ve demoda birkaç saat çalışır. Bu yüzden ücretsiz seçenekler yeterli:
+
+| Seçenek | Kullanım | Not |
+|---|---|---|
+| Geliştirme bilgisayarı (RTX 3060 12 GB) | Varsayılan: geliştirme, testler, demo | Sunucu gerektiğinde başlatılır; ekip Tailscale (ücretsiz) ile farklı ağlardan bağlanır. 3-5 kullanıcı ve 2-3 dil için yeterli görünüyor |
+| Modal (aylık ~$30 ücretsiz kredi) | Bulut yedeği, demo | GPU'lu WebSocket uç noktası; boşta kapanır, sadece toplantı süresince harcar. Modellerin yüklenmesi için toplantıdan ~1 dk önce başlatılır |
+| Kaggle / Colab (ücretsiz GPU) | İnce ayar ve değerlendirme koşuları; gerekirse kısa testler | Not defteri ortamı; sunucu için tünel (cloudflared, ngrok) gerekir ve bağlantı kopabilir. Notlandırılan demo için önerilmez |
+| Üniversitedeki RTX 5080 (16 GB) | Demo günü | Sürekli kullanım için değil, demo için rezerve edilir |
+
+Demoda sunucunun tek hata noktası olma riskine karşı: geliştirme bilgisayarı ve Modal ikisi de hazır tutulur, biri düşerse diğeri açılır.
 
 ## Gecikme bütçesi (hedef < 3 s)
 
