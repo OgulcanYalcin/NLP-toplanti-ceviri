@@ -67,6 +67,24 @@ GPU belleği yetmez. Bu yüzden sonraki adımda:
 
 WhisperLiveKit / WhisperLive bu sunucu yapısını hazır sunuyor; v1'deki `Segment` arayüzü korunursa geçiş istemci kodunu değiştirmez.
 
+## Tartışılacak: sunucu mu, istemci mi?
+
+Hedef ürün: herkes kendi bilgisayarında uygulamayı açar, her istemci yalnızca **kendi mikrofonunu** yazıya döker
+(konuşmacı bilgisi bedavaya gelir), konuşmalar ortak bir transkript havuzuna düşer ve her dinleyici onları kendi dilinde,
+konuşanın sesiyle duyar. Ağır işin nerede yapılacağı henüz kararlaştırılmadı.
+
+| | Her şey istemcide (D-004) | Sunucuda (istemci: yakalama, VAD, yankı önleme, çalma, altyazı) |
+|---|---|---|
+| Donanım | Her kullanıcıda NVIDIA GPU gerekir | Tek GPU yeter, istemci herhangi bir dizüstü olabilir |
+| Tekrarlanan iş | Her istemci aynı konuşmayı tekrar çevirip seslendirir | Çeviri ve seslendirme hedef dil başına bir kez, aynı dili isteyen herkese gönderilir |
+| Ağ | Gerekmez (havuz hariç) | Her yön ~50-150 ms ek gecikme; ses yükü küçük |
+| Gizlilik | Ses bilgisayardan çıkmaz | Toplantı sesi ve ses profilleri sunucuya gider: onay, TLS, silme seçeneği gerekir |
+| Risk | Bir istemci çökerse sadece o etkilenir | Sunucu düşerse herkes etkilenir (demo riski) |
+| İş yükü | Basit | WebSocket, oda/oturum yönetimi, yeniden bağlanma |
+
+Sunucu için seçenekler: geliştirme bilgisayarı (RTX 3060 12 GB; 3-5 kullanıcı ve 2-3 dil için yeterli görünüyor),
+saatlik kiralık bulut GPU veya üniversite sunucusu. `Segment` arayüzü iki yapıda da aynı kalır; sadece kuyruk yerine WebSocket ile taşınır.
+
 ## Gecikme bütçesi (hedef < 3 s)
 
 | Aşama | Hedef |

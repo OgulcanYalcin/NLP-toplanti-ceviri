@@ -63,3 +63,8 @@ olduğu için test verisi toplamak ve sonuçları kontrol etmek kolay. Bkz. [D-0
 - Hocanın beklediği teslim biçimi (demo, rapor, kod) ve kesin tarih.
 - v1'de sadece Türkçe konuşma mı, yoksa dil otomatik algılansın mı?
 - Adım 2 ve 3'ün sahipleri.
+- **Tartışılacak: hedef ürün ve sunucu.** Herkes kendi bilgisayarında uygulamayı açar; her konuşma ortak bir
+  transkript havuzuna düşer ve herkes onu kendi dilinde, konuşanın kendi sesiyle duyar. Bu durumda işlem bir
+  sunucuda mı (istemci sadece ses yakalar ve çalar), yoksa her istemcide mi yapılmalı? Ayrıntı: [architecture.md](architecture.md#tartışılacak-sunucu-mu-istemci-mi).
+- **Tartışılacak: kullanıcının kendi sesi.** Kullanıcı kısa bir metin okur, çeviri onun sesiyle seslendirilir
+  (sıfır-atış ses klonlama, ör. XTTS-v2 veya Chatterbox Multilingual). v1'de mi, uç adım mı?

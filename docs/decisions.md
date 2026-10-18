@@ -6,6 +6,7 @@ En yeni üstte. Durum: **öneri** (ekip onaylayana kadar) veya **kabul**.
 - **Karar:** bir istemci = bir dil çifti = tek süreçte ses yakalama + ASR + MT + TTS.
 - **Neden:** en basit yapı; demo için tek dil çifti yeterli. Paylaşılan ASR sunucusu çoklu istemci uç adımına bırakıldı.
 - **Reddedilen:** baştan istemci-sunucu yapısı (WebSocket, oturum yönetimi) v1 için gereksiz iş çıkarır.
+- **Not:** ortak transkript havuzu ve kişisel ses hedefiyle sunucu yapısı yeniden tartışılıyor; bkz. [architecture.md](architecture.md#tartışılacak-sunucu-mu-istemci-mi).
 
 ### D-003 · Aşamalar `Segment` ile konuşur, çeviri yalnızca kesinleşmiş parçaları işler · öneri · 18 Eki 2026
 - **Karar:** ASR, MT ve TTS ortak `Segment` veri sınıfını alıp verir; `is_final=False` parçalar sadece ekranda geçici gösterilir.
