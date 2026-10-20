@@ -1,80 +1,55 @@
-import cuda_ayar
+"""Mikrofonu canlı dinler, konuşmacı duraklayınca yazıya döküp çevirir."""
+
 import queue
-import re
 import time
-import numpy as np
 import sounddevice as sd
-from faster_whisper import WhisperModel
-from transformers import MarianMTModel, MarianTokenizer
+import ayarlar
+from konusma import KonusmaTanima
+from ceviri import Cevirmen
+from kesici import KonusmaKesici
 
-# --- Ayarlar ---
-WHISPER_MODELI = "small"
-CEVIRI_MODELI = "Helsinki-NLP/opus-mt-tr-en"
-ORNEKLEME_HIZI = 16000
-PARCA_SURESI = 4
+yon = ayarlar.YONLER["A"]
 
-# --- Modelleri yükle ---
-print ("Konuşma tanıma modeli yükleniyor...")
-whisper = WhisperModel(WHISPER_MODELI, device="cuda", compute_type="float16")
+# --- Modülleri Hazırla ---
+print("Modeller Yükleniyor...")
+konusma = KonusmaTanima(ayarlar.WHISPER_MODELI,ayarlar.CIHAZ)
+cevirmen = Cevirmen(yon["ceviri_modeli"], ayarlar.CIHAZ)
+kesici = KonusmaKesici(ayarlar.ORNEKLEME_HIZI, ayarlar.SESSIZLIK_ESIGI, ayarlar.SESSIZLIK_SURESI, ayarlar.MAKS_PARCA_SURESI)
 
-print ("Çeviri modeli yükleniyor...")
-tokenizer = MarianTokenizer.from_pretrained(CEVIRI_MODELI)
-cevirmen = MarianMTModel.from_pretrained(CEVIRI_MODELI).to("cuda")
-
-def cumlelere_bol(metin):
-    """ Metni . ! ? işaretlerinden sonra cümlelere böler. """
-    cumleler = re.split(r"(?<=[.!?])\s+", metin)
-    return [c for c in cumleler if c]
-
-def cevir(metin):
-    """ Türkçe metni cümle cümle İngilizceye çevirir. """
-    cumleler = cumlelere_bol(metin)
-    girdiler = tokenizer(cumleler, return_tensors="pt", padding =True).to("cuda")
-    ciktilar = cevirmen.generate(**girdiler, num_beams=4, max_length=256)
-    ceviriler = tokenizer.batch_decode(ciktilar, skip_special_tokens=True)
-    return " ".join(ceviriler)
-
-# --- Mikrofon --> Kuyruk ---
+# --- Mikrofon -> kuyruk ---
 ses_kuyrugu = queue.Queue()
 
 def mikrofondan_gelen(veri, kare_sayisi, zaman, durum):
-    """ Mikrofondan her yeni ses parçası geldiğinde otomatik çağırılır. """
-    if durum: 
+    """Mikrofondan her yeni ses bloğu geldiğinde otomatik çağırılır."""
+    if durum:
         print(durum)
     ses_kuyrugu.put(veri.copy())
 
-# --- Ana döngü ---
-parca_boyu = PARCA_SURESI * ORNEKLEME_HIZI
-tampon = np.zeros(0, dtype=np.float32)
+def isle(parca):
+    """Bir konuşma parçasını yazıya döküp çevirir ve ekrana yazar."""
+    baslangic = time.time()
+    orijinal = konusma.yaziya_dok(parca, yon["konusma_dili"])
+    if not orijinal:
+        return
 
+    ceviri = cevirmen.cevir(orijinal)
+    gecikme = time.time() - baslangic
+    ses_suresi = len(parca) / ayarlar.ORNEKLEME_HIZI
+
+    print(f"[{ses_suresi:4.1f} sn konuşma | {gecikme:.2f} sn işlemi]")
+    print(f" Orijinal: {orijinal}")
+    print(f" Çeviri: {ceviri}\n")
+
+# --- Ana döngü ---
+blok_boyu = int(ayarlar.BLOK_SURESI * ayarlar.ORNEKLEME_HIZI)
 print("\nDinleniyor... Durdurmak için Ctrl + C\n")
 
-with sd.InputStream(
-    samplerate=ORNEKLEME_HIZI,
-    channels=1,
-    dtype="float32",
-    callback=mikrofondan_gelen
-):
+with sd.InputStream(samplerate=ayarlar.ORNEKLEME_HIZI, channels=1, dtype="float32", blocksize=blok_boyu, callback=mikrofondan_gelen):
     try:
         while True:
-            # Kuyruktan gelen sesi tampon'a ekle
-            blok = ses_kuyrugu.get()
-            tampon = np.concatenate([tampon, blok.flatten()])
-
-            # Yeterince ses biriktiyse işle
-            if len(tampon) >= parca_boyu:
-                parca = tampon[:parca_boyu]
-                tampon = tampon[parca_boyu:]
-
-                baslangic = time.time()
-                segmentler, _ = whisper.transcribe(parca, language="tr", beam_size=5, vad_filter=True)
-                turkce = " ".join(s.text.strip() for s in segmentler).strip()
-
-                if turkce:
-                    ingilizce = cevir(turkce)
-                    gecikme = time.time() - baslangic
-                    print(f"TR: {turkce}")
-                    print(f"EN: {ingilizce}")
-
+            blok = ses_kuyrugu.get().flatten()
+            parca = kesici.ekle(blok)
+            if parca is not None:
+                isle(parca)
     except KeyboardInterrupt:
         print("\nDurduruldu.")

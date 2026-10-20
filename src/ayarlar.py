@@ -9,6 +9,15 @@ WHISPER_MODELI = "small"
 # --- Ses ---
 ORNEKLEME_HIZI = 16000
 
+BLOK_SURESI = 0.1
+
+# --- Sessizliğe göre kesme ---
+SESSIZLIK_ESIGI = 0.01
+
+SESSIZLIK_SURESI = 0.5
+
+MAKS_PARCA_SURESI = 10
+
 # --- Konuşma yönleri ---
 YONLER = {
     "A": {
