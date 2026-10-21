@@ -24,4 +24,8 @@ YONLER = {
         "konusma_dili": "tr",
         "ceviri_modeli": "Helsinki-NLP/opus-mt-tr-en",
     },
+    "B": {
+        "konusma_dili": "en",
+        "ceviri_modeli": "Helsinki-NLP/opus-mt-tc-big-en-tr",
+    },
 }

@@ -3,10 +3,23 @@
 import re
 from transformers import MarianMTModel, MarianTokenizer
 
+# Sonundaki nokta cümle sonu sayılmayacak kısaltmalar (küçük harfle)
+KISALTMALAR = {"mr.", "mrs.", "ms.", "dr.", "prof.", "st.", "vs.", "etc.", "sn.", "vb."}
+
 def cumlelere_bol(metin):
-    """"Metni . ! ? işaretlerinden sonra cümlelere böler."""
-    cumleler = re.split(r"(?<=[.!?])\s+", metin)
-    return [c for c in cumleler if c]
+    """"Metni . ! ? işaretlerinden sonra cümlelere böler. Kısaltmalarda bölmez."""
+    parcalar = re.split(r"(?<=[.!?])\s+", metin)
+
+    cumleler = []
+    for parca in parcalar:
+        if not parca:
+            continue
+
+        if cumleler and cumleler[-1].split()[-1].lower() in KISALTMALAR:
+            cumleler[-1] += " " + parca
+        else:
+            cumleler.append(parca)
+    return cumleler
 
 class Cevirmen:
     """"Bir dilden diğerine çeviri yapan MarianMt modeli."""

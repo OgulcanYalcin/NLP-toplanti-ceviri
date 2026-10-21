@@ -1,5 +1,6 @@
 """Mikrofonu canlı dinler, konuşmacı duraklayınca yazıya döküp çevirir."""
 
+import sys
 import numpy as np
 import queue
 import time
@@ -9,7 +10,10 @@ from konusma import KonusmaTanima
 from ceviri import Cevirmen
 from kesici import KonusmaKesici
 
-yon = ayarlar.YONLER["A"]
+# Yön komut satırından seçlilir: "python src/canli.py B". Verilmeze A kullanılır.
+yon_adi = sys.argv[1] if len(sys.argv) > 1 else "A"
+yon = ayarlar.YONLER[yon_adi]
+print(f"Yön: {yon_adi} | Konuşma dili: {yon['konusma_dili']} | Çeviri: {yon['konusma_dili']}")
 
 # --- Modülleri Hazırla ---
 print("Modeller Yükleniyor...")
