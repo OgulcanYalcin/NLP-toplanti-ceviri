@@ -1,5 +1,6 @@
 """Mikrofonu canlı dinler, konuşmacı duraklayınca yazıya döküp çevirir."""
 
+import numpy as np
 import queue
 import time
 import sounddevice as sd
@@ -15,6 +16,11 @@ print("Modeller Yükleniyor...")
 konusma = KonusmaTanima(ayarlar.WHISPER_MODELI,ayarlar.CIHAZ)
 cevirmen = Cevirmen(yon["ceviri_modeli"], ayarlar.CIHAZ)
 kesici = KonusmaKesici(ayarlar.ORNEKLEME_HIZI, ayarlar.SESSIZLIK_ESIGI, ayarlar.SESSIZLIK_SURESI, ayarlar.MAKS_PARCA_SURESI)
+
+# --- Isınma: ilk gerçek konuşmanın gecikmemesi için modelleri bir kez boşta çalıştır ---
+print("Modeller ısınıyor...")
+konusma.yaziya_dok(np.zeros(ayarlar.ORNEKLEME_HIZI, dtype=np.float32), yon["konusma_dili"])
+cevirmen.cevir("Merhaba.")
 
 # --- Mikrofon -> kuyruk ---
 ses_kuyrugu = queue.Queue()
