@@ -4,7 +4,7 @@
 CIHAZ ="cuda"
 
 # --- Konuşma tanıma ---
-WHISPER_MODELI = "small"
+WHISPER_MODELI = "large-v3-turbo"  # ölçüm: docs/asr-research.md, 5b
 
 # --- Ses ---
 ORNEKLEME_HIZI = 16000
