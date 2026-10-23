@@ -9,6 +9,7 @@ from konusma import KonusmaTanima
 from ceviri import Cevirmen
 from kesici import KonusmaKesici
 from ses_kaynagi import Mikrofon, HoparlorSesi
+from altyazi_penceresi import AltyaziPenceresi
 
 ZAMAN_ASIMI = 0.2
 
@@ -60,24 +61,14 @@ def isci():
         print(f"[{etiket} | {yon['konusma_dili']}] ({gecikme:.2f} sn)")
         print(f"    Orijinal: {orijinal}")
         print(f"    Çeviri: {ceviri}\n")
+        # B'nin sözlerinin çevirisi A'nın ekranındaki pencerede gösterilir
+        if etiket == "B":
+            pencere.goster(ceviri)
 
 
-# --- Başlat ---
-for etiket,kaynak in kaynaklar.items():
-    print(f"{etiket}: {kaynak.ad}")
-    kaynak.baslat()
-
-threadler = [threading.Thread(target=dinleyici, args=(etiket, kaynak), daemon=True) for etiket, kaynak in kaynaklar.items()]
-threadler.append(threading.Thread(target=isci, daemon=True))
-for t in threadler:
-    t.start()
-
-print("\nToplantı dinleniyor... Durdurmak için Ctrl + C\n")
-
-try:
-    while True:
-        time.sleep(0.5)
-except KeyboardInterrupt:
+# --- Kapanış ---
+def kapat():
+    """Altyazı penceresi kapanırken çağırılır: thread'leri ve ses kaynaklarını durdurur."""
     print("\nDurduruluyor...")
     calisiyor.clear()
     for t in threadler:
@@ -85,3 +76,18 @@ except KeyboardInterrupt:
     for kaynak in kaynaklar.values():
         kaynak.durdur()
     print("Durduruldu.")
+
+# --- Başlat ---
+pencere = AltyaziPenceresi(kapaninca=kapat)
+
+for etiket, kaynak in kaynaklar.items():
+    print(f"{etiket}: {kaynak.ad}")
+    kaynak.baslat()
+
+threadler = [threading.Thread(target=dinleyici, args=(etiket, kaynak), daemon=True) for etiket,kaynak in kaynaklar.items()]
+threadler.append(threading.Thread(target=isci,daemon=True))
+for t in threadler:
+    t.start()
+
+print("\nToplantı dinleniyor... Kapatmak için altyazı penceresine SAĞ TIKLA\n")
+pencere.calistir()
