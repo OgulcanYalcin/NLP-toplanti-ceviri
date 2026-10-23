@@ -70,6 +70,39 @@ Ses verileri repoya girmez (`data/` zaten `.gitignore`'da); Common Voice lisans�
 - **RTF** (işlem süresi / ses süresi) ve **gecikme**: konuşma bitişinden metnin ekrana gelmesine kadar geçen süre (ortalama ve p90).
 - Aynı test seti, aynı normalizasyon, tüm modeller için tek tabloda.
 
+## 5b. İlk ölçüm sonuçları (21 Eki 2026)
+
+Test seti: MediaSpeech TR'den ilk 300 dosya (ada göre sıralı), 72 dakika haber/TV konuşması. RTX 3060, float16, `beam_size=5`.
+Komut: `python src/asr_olc.py data/mediaspeech_tr/TR --modeller small medium large-v3-turbo --vad acik kapali --sinir 300`
+
+| Model | VAD | WER | CER | RTF |
+|---|---|---|---|---|
+| small (şu anki varsayılan) | açık | 19.6% | 9.2% | 0.048 |
+| small | kapalı | 18.6% | 8.3% | 0.046 |
+| medium | açık | 12.9% | 6.1% | 0.081 |
+| medium | kapalı | 13.1% | 6.1% | 0.079 |
+| **large-v3-turbo** | açık | **10.6%** | **5.9%** | **0.040** |
+| large-v3-turbo | kapalı | 10.5% | 5.7% | 0.039 |
+
+- **large-v3-turbo hem en doğru hem en hızlı:** `small`'a göre kelime hatası ~%46 daha az, gerçek zamandan ~25 kat hızlı.
+  Turbo'nun decoder'ı 4 katman olduğu için `small`'dan bile hızlı çözüyor. → varsayılan model `large-v3-turbo` yapıldı (D-002).
+- **VAD filtresi toplamda fark yaratmıyor** (10.6% / 10.5%). Bazı dosyalarda müzikli konuşmayı atıyor, ama canlı kullanımda
+  sessizliği atlaması işe yarıyor; açık kalıyor, canlı testte tekrar bakılacak.
+- Normalizasyon önemli: referanslar sayıları yazıyla yazıyor ("kırk"), Whisper rakamla ("40"). Rakamlar yazıya çevrilmeden önce
+  WER turbo için 13.7%, small için 22.2% çıkıyordu; ~3 puanlık fark gerçek hata değil, yazım farkıydı.
+
+### Tipik hatalar (turbo, en kötü dosyalar)
+
+1. **Konuşmanın bir kısmı hiç yazılmıyor** (en büyük hata kaynağı). Dosya ortasında konuşmacı değişince veya araya müzik girince
+   Whisper ilk ya da son cümleyi atlıyor (WER %77-87). Bir kısmı VAD'den (VAD kapatınca düzeliyor), bir kısmı Whisper'ın kendisinden.
+   Toplantıda konuşmacı değişimi sık olduğu için **canlı testte izlenmeli**; parçaları kısa tutmak (kesici) bunu azaltır.
+2. **Özel isimler:** "Kanuni" → "Kandone" (small), "Habertürk" → "haber fiktir", "Nazlıkul" → "Nazlı Kul". İnce ayar için iyi hedef.
+3. **Konuşma dili / yazı dili farkı:** referans "aktarıcaz, olucak", Whisper "aktaracağız, olacak" yazıyor. Toplantı metni için
+   Whisper'ınki daha kullanışlı; hata gibi görünse de sorun değil.
+4. **Referans hataları:** MediaSpeech referansları bazen yanlış veya eksik (ör. referans "fener şenliği", Whisper doğru olarak
+   "Şener Şen"). Bu yüzden WER'in bir kısmı gürültü; kendi toplantı kayıtlarımızla ayrıca ölçülmeli.
+5. **Dosya kenarları:** MediaSpeech parçaları kelime ortasından kesilmiş; ilk/son kelime sık sık eksik.
+
 ## 6. İnce ayar (README'deki "fine-tuning ve karşılaştırma" maddesi)
 
 - `large-v3-turbo` üzerinde LoRA (PEFT) ile Common Voice + ISSAI eğitimi; 12 GB kartta 8-bit + gradient checkpointing ile yapılabilir.

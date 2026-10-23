@@ -18,6 +18,8 @@ En yeni üstte. Durum: **öneri** (ekip onaylayana kadar) veya **kabul**.
 - **Neden:** turbo, large-v3'e yakın doğrulukta ve canlı kullanım için yeterince hızlı; 12 GB GPU'ya rahat sığar.
   faster-whisper zaten kurulu ve streaming kütüphanelerinin önerdiği backend.
 - **Reddedilen:** `large-v3` (canlı kullanım için yavaş), Qwen3-ASR (Türkçe sonucu yayımlanmamış, ölçüm listesinde kalıyor). Ayrıntı: [asr-research.md](asr-research.md).
+- **Ölçüm (21 Eki):** MediaSpeech TR 300 dosyada WER `small` 19.6%, `medium` 12.9%, `large-v3-turbo` 10.6%; turbo aynı zamanda en hızlısı (RTF 0.040).
+  `ayarlar.WHISPER_MODELI` `large-v3-turbo` yapıldı.
 
 ### D-001 · İlk dil çifti Türkçe → İngilizce · öneri · 18 Eki 2026
 - **Karar:** v1 ve demo TR → EN ile yapılır; diğer çiftler (ör. DE → EN) uç adım.

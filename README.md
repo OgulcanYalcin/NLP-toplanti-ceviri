@@ -34,6 +34,20 @@ python -u src/pipeline.py
 
 Ses dosyası `data/` klasörüne konmalı ve `src/pipeline.py` içindeki `SES_DOSYASI` ayarı güncellenmeli.
 
+## Konuşma tanıma ölçümü
+
+Modelleri aynı test setinde karşılaştırır (WER, CER, RTF). Test seti: her ses dosyasının yanında aynı adlı `.txt`
+referans metni olan bir klasör. Örnek veri: [MediaSpeech Türkçe](https://openslr.org/108/) (CC BY 4.0),
+`data/` altına açılır.
+
+```powershell
+python src/asr_olc.py data/mediaspeech_tr/TR --modeller small large-v3-turbo --sinir 200
+```
+
+Sonuç `outputs/asr_olcum_<tarih>.md` (özet tablo + en çok hata yapılan dosyalar) ve `.csv` (dosya bazında) olarak yazılır.
+
+Testler (GPU gerekmez): `python -m pytest`
+
 ## Proje durumu
 
 - [x] Ses dosyasını yazıya dökme
