@@ -10,6 +10,7 @@ from ceviri import Cevirmen
 from kesici import KonusmaKesici
 from ses_kaynagi import Mikrofon, HoparlorSesi
 from altyazi_penceresi import AltyaziPenceresi
+from altyazi_dosyası import AltyaziDosyasi
 
 ZAMAN_ASIMI = 0.2
 
@@ -29,6 +30,8 @@ kaynaklar = {
     "B": HoparlorSesi(ayarlar.ORNEKLEME_HIZI,ayarlar.BLOK_SURESI),
 }
 
+# --- Karşı tarafa altyazı (OBS bu dosyayı okur) ---
+karsi_altyazi = AltyaziDosyasi(ayarlar.KARSI_ALTYAZI_DOSYASI)
 is_kuyrugu = queue.Queue()
 calisiyor = threading.Event()
 calisiyor.set()
@@ -46,6 +49,8 @@ def dinleyici(etiket, kaynak):
 def isci():
     """TÜKETİCİ: İş kuyruğundan parçaları sıraylar alır, yazıya döküp çevirir."""
     while calisiyor.is_set():
+        karsi_altyazi.kontrol_et()
+
         try:
             etiket, parca, hazir_zamani = is_kuyrugu.get(timeout=ZAMAN_ASIMI)
         except queue.Empty:
@@ -65,6 +70,8 @@ def isci():
         if etiket == "B":
             pencere.goster(ceviri)
 
+        if etiket == "A":
+            karsi_altyazi.goster(ceviri)
 
 # --- Kapanış ---
 def kapat():
@@ -75,6 +82,7 @@ def kapat():
         t.join(timeout=2)
     for kaynak in kaynaklar.values():
         kaynak.durdur()
+    karsi_altyazi.temizle()
     print("Durduruldu.")
 
 # --- Başlat ---

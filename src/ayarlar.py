@@ -29,3 +29,6 @@ YONLER = {
         "ceviri_modeli": "Helsinki-NLP/opus-mt-tc-big-en-tr",
     },
 }
+
+# --- Karşı tarafa altyazı (OBS bu dosyayı okur) ---
+KARSI_ALTYAZI_DOSYASI = "outputs/karsi_altyazi.txt"
